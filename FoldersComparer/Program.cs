@@ -50,7 +50,7 @@ namespace FoldersComparer
             using (var writer = new StreamWriter(directoryRootName1, false))
                 result1.ForEach(result => writer.WriteLine(result));
 
-            string directoryRootName2 = directoryReader1.GetRootFolderName();
+            string directoryRootName2 = directoryReader2.GetRootFolderName();
             if (directoryRootName1 == directoryRootName2)
                 directoryRootName2 += " (1)";
             using (var writer = new StreamWriter(directoryRootName2, false))
