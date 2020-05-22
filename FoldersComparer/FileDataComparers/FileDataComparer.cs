@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
-namespace FoldersComparer
+namespace FoldersComparer.FileDataComparers
 {
-    public sealed class FileDataComparer : IEqualityComparer<FileData>
+    public sealed class FileDataComparer : IFileDataComparer
     {
         public bool Equals([AllowNull] FileData x, [AllowNull] FileData y) => x.TrimmedName == y.TrimmedName && x.Size == y.Size;
 

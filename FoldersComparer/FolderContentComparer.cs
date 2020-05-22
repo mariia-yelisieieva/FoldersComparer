@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using FoldersComparer.FileDataComparers;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace FoldersComparer
 {
     public sealed class FolderContentComparer
     {
-        public (List<FileData?>, List<FileData?>) CompareFileSets(List<FileData> directoryData1, List<FileData> directoryData2, FileDataComparer fileDataComparer)
+        public (List<FileData?>, List<FileData?>) CompareFileSets(List<FileData> directoryData1, List<FileData> directoryData2, IFileDataComparer fileDataComparer)
         {
             directoryData1 = directoryData1.OrderBy(file => file.Name).ToList();
             directoryData2 = directoryData2.OrderBy(file => file.Name).ToList();

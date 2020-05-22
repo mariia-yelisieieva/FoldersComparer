@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FoldersComparer.FileDataComparers;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -41,9 +42,9 @@ namespace FoldersComparer
             List<FileData> directoryData1 = directoryReader1.ReadDirectiryData().ToList();
             List<FileData> directoryData2 = directoryReader2.ReadDirectiryData().ToList();
 
-            var fileInfoComparer = new FileDataComparer();
+            var fileHashComparer = new FileHashComparer();
             var comparer = new FolderContentComparer();
-            (List<FileData?> result1, List<FileData?> result2) = comparer.CompareFileSets(directoryData1, directoryData2, fileInfoComparer);
+            (List<FileData?> result1, List<FileData?> result2) = comparer.CompareFileSets(directoryData1, directoryData2, fileHashComparer);
 
             string directoryRootName1 = directoryReader1.GetRootFolderName();
             using (var writer = new StreamWriter(directoryRootName1, false))
