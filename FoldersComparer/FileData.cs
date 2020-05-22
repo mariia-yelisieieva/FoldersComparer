@@ -28,6 +28,6 @@ namespace FoldersComparer
             this.hashProvider = new FileHashProvider();
         }
 
-        public override string ToString() => $"{this.Name} (size: {this.Size} bytes)";
+        public override string ToString() => $"{this.Name} (size: {this.Size} B)";
     }
 }
