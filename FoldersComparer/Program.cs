@@ -1,5 +1,4 @@
-﻿using FoldersComparer.FileDataComparers;
-using Microsoft.Extensions.Configuration;
+﻿using FoldersComparer.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,22 +9,16 @@ namespace FoldersComparer
     {
         static void Main(string[] args)
         {
-            IConfigurationRoot configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetParent(AppContext.BaseDirectory).FullName).AddJsonFile("appsettings.json", false).Build();
+            var configProvider = new ConfigurationProvider();
+            Configuration.Configuration config = configProvider.GetConfiguration();
 
-            string directory1 = configuration["directory1"];
-            string directory2 = configuration["directory2"];
-            bool trimPath = Convert.ToBoolean(configuration["trimPath"]);
-            bool showEqual = Convert.ToBoolean(configuration["showEqual"]);
-
-            string[] directories = new[] { directory1, directory2 };
-            int directoriesCount = directories.Length;
+            int directoriesCount = config.Directories.Length;
 
             var directoryReaders = new DirectoryReader[directoriesCount];
             for (int i = 0; i < directoriesCount; i++)
             {
-                string directory = directories[i];
-                directoryReaders[i] = new DirectoryReader(directory, trimPath);
+                string directory = config.Directories[i];
+                directoryReaders[i] = new DirectoryReader(directory, config.TrimPaths);
                 if (!directoryReaders[i].DirectoryExists())
                 {
                     Console.WriteLine("The first suggested directory doesn't exist.");
@@ -35,13 +28,10 @@ namespace FoldersComparer
 
             var directoryDataAll = new List<FileData>[directoriesCount];
             for (int i = 0; i < directoriesCount; i++)
-            {
                 directoryDataAll[i] = directoryReaders[i].ReadDirectiryData();
-            }
 
-            var fileHashComparer = new FileHashComparer();
-            var comparer = new FolderContentComparer(fileHashComparer);
-            List<FileData?>[] results = comparer.CompareFileSets(showEqual, directoryDataAll);
+            var comparer = new FolderContentComparer(config.DataComparer);
+            List<FileData?>[] results = comparer.CompareFileSets(config.ShowEqualLines, directoryDataAll);
 
             var fileNameProvider = new ResultFileNameProvider(directoriesCount);
             for (int i = 0; i < directoriesCount; i++)
