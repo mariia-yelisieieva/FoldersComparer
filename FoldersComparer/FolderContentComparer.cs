@@ -6,7 +6,7 @@ namespace FoldersComparer
 {
     public sealed class FolderContentComparer
     {
-        public (List<FileData?>, List<FileData?>) CompareFileSets(List<FileData> directoryData1, List<FileData> directoryData2, IFileDataComparer fileDataComparer)
+        public (List<FileData?>, List<FileData?>) CompareFileSets(List<FileData> directoryData1, List<FileData> directoryData2, IFileDataComparer fileDataComparer, bool showEqual)
         {
             directoryData1 = directoryData1.OrderBy(file => file.Name).ToList();
             directoryData2 = directoryData2.OrderBy(file => file.Name).ToList();
@@ -17,6 +17,14 @@ namespace FoldersComparer
             var result2 = new List<FileData?>();
             foreach (FileData file in allData)
             {
+                if (!showEqual && fileIndex1 < directoryData1.Count && fileIndex2 < directoryData2.Count 
+                    && fileDataComparer.Equals(directoryData1[fileIndex1], file) && fileDataComparer.Equals(directoryData2[fileIndex2], file))
+                {
+                    fileIndex1++;
+                    fileIndex2++;
+                    continue;
+                }
+
                 if (fileIndex1 < directoryData1.Count)
                 {
                     if (fileDataComparer.Equals(directoryData1[fileIndex1], file))
