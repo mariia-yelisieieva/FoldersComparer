@@ -1,4 +1,5 @@
 ﻿using FoldersComparer.FileDataComparers;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,21 +11,13 @@ namespace FoldersComparer
     {
         static void Main(string[] args)
         {
-            //Console.WriteLine("Please, enter the first directory:");
-            //string directory1 = Console.ReadLine();
-            //Console.WriteLine();
+            IConfigurationRoot configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetParent(AppContext.BaseDirectory).FullName).AddJsonFile("appsettings.json", false).Build();
 
-            //Console.WriteLine("Please, enter the second directory:");
-            //string directory2 = Console.ReadLine();
-            //Console.WriteLine();
-
-            //Console.WriteLine("Type YES if you want to get a full directory name or just press enter:");
-            //bool trimPath = Console.ReadLine() != "YES";
-
-            string directory1 = @"D:\Data\Udemy\";
-            string directory2 = @"D:\Data\Udemy1\";
-            bool trimPath = true;
-            bool showEqual = false;
+            string directory1 = configuration["directory1"];
+            string directory2 = configuration["directory2"];
+            bool trimPath = Convert.ToBoolean(configuration["trimPath"]);
+            bool showEqual = Convert.ToBoolean(configuration["showEqual"]);
 
             var directoryReader1 = new DirectoryReader(directory1, trimPath);
             if (!directoryReader1.DirectoryExists())
