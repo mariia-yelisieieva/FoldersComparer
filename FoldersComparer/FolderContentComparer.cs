@@ -6,52 +6,69 @@ namespace FoldersComparer
 {
     public sealed class FolderContentComparer
     {
-        public (List<FileData?>, List<FileData?>) CompareFileSets(List<FileData> directoryData1, List<FileData> directoryData2, IFileDataComparer fileDataComparer, bool showEqual)
-        {
-            directoryData1 = directoryData1.OrderBy(file => file.Name).ToList();
-            directoryData2 = directoryData2.OrderBy(file => file.Name).ToList();
-            List<FileData> allData = directoryData1.Union(directoryData2, fileDataComparer).OrderBy(file => file.TrimmedName).ThenBy(file => file.Size).ToList();
+        private readonly IFileDataComparer fileDataComparer;
 
-            int fileIndex1 = 0, fileIndex2 = 0;
-            var result1 = new List<FileData?>();
-            var result2 = new List<FileData?>();
+        public List<FileData?>[] CompareFileSets(bool showEqual, params List<FileData>[] directoriesData)
+        {
+            IEnumerable<FileData> allData = new List<FileData>();
+            for (int i = 0; i < directoriesData.Length; i++)
+            {
+                directoriesData[i] = directoriesData[i].OrderBy(file => file.Name).ToList();
+                allData = allData.Union(directoriesData[i], this.fileDataComparer);
+            }
+            allData = allData.OrderBy(file => file.TrimmedName).ThenBy(file => file.Size).ToList();
+
+            var fileIndices = new int[directoriesData.Length];
+            for (int i = 0; i < directoriesData.Length; i++)
+                fileIndices[i] = 0;
+
+            var results = new List<FileData?>[directoriesData.Length];
+            for (int i = 0; i < directoriesData.Length; i++)
+                results[i] = new List<FileData?>();
+
             foreach (FileData file in allData)
             {
-                if (!showEqual && fileIndex1 < directoryData1.Count && fileIndex2 < directoryData2.Count 
-                    && fileDataComparer.Equals(directoryData1[fileIndex1], file) && fileDataComparer.Equals(directoryData2[fileIndex2], file))
-                {
-                    fileIndex1++;
-                    fileIndex2++;
+                if (!showEqual && this.AreAllLinesEqual(directoriesData, fileIndices, file))
                     continue;
-                }
 
-                if (fileIndex1 < directoryData1.Count)
+                for (int i = 0; i < directoriesData.Length; i++)
                 {
-                    if (fileDataComparer.Equals(directoryData1[fileIndex1], file))
+                    if (fileIndices[i] >= directoriesData[i].Count)
                     {
-                        result1.Add(file);
-                        fileIndex1++;
+                        results[i].Add(null);
+                        continue;
+                    }
+
+                    if (this.fileDataComparer.Equals(directoriesData[i][fileIndices[i]], file))
+                    {
+                        results[i].Add(file);
+                        fileIndices[i]++;
                     }
                     else
-                        result1.Add(null);
+                        results[i].Add(null);
                 }
-                else
-                    result1.Add(null);
-
-                if (fileIndex2 < directoryData2.Count)
-                {
-                    if (fileDataComparer.Equals(directoryData2[fileIndex2], file))
-                    {
-                        result2.Add(file);
-                        fileIndex2++;
-                    }
-                    else
-                        result2.Add(null);
-                }
-                else
-                    result2.Add(null);
             }
-            return (result1, result2);
+            return results;
+        }
+
+        private bool AreAllLinesEqual(List<FileData>[] directoriesData, int[] fileIndices, FileData file)
+        {
+            bool allEqual = true;
+            for (int i = 0; i < directoriesData.Length; i++)
+                allEqual &= fileIndices[i] < directoriesData[i].Count && this.fileDataComparer.Equals(directoriesData[i][fileIndices[i]], file);
+
+            if (allEqual)
+            {
+                for (int i = 0; i < directoriesData.Length; i++)
+                    fileIndices[i]++;
+                return true;
+            }
+            return false;
+        }
+
+        public FolderContentComparer(IFileDataComparer fileDataComparer)
+        {
+            this.fileDataComparer = fileDataComparer;
         }
     }
 }
